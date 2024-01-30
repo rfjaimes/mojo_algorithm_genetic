@@ -1,6 +1,7 @@
 import random
 import itertools
 import multiprocessing
+import time
 from urllib import request
 import json
 
@@ -77,9 +78,10 @@ if __name__ == "__main__":
     load_distances()
     city_count = 251
     population_size = 100
-    generations = 100
+    generations = 1000
     crossover_probability = 0.8
     mutation_probability = 0.2
+    start_time = time.time()
 
     # Generar ciudades aleatorias en un espacio bidimensional
     cities = [(random.random(), random.random()) for _ in range(city_count)]
@@ -113,3 +115,5 @@ if __name__ == "__main__":
         print(f"Generación {generation + 1}: Mejor distancia = {best_distance}, Size: {len(population)}")
 
     print(f"Mejor ruta encontrada: {best_route}")
+    
+    print("execution time: ", time.time() - start_time)
