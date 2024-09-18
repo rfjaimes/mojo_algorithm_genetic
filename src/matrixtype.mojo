@@ -1,8 +1,8 @@
 from random import rand
-
+from memory import memset_zero
 
 struct Matrix[type: DType]:
-    var data: DTypePointer[type]
+    var data: UnsafePointer[Scalar[type]]
     var rows: Int
     var cols: Int
     var size: Int
@@ -10,7 +10,7 @@ struct Matrix[type: DType]:
     var not_selected: List[Int]
 
     fn __init__(inout self, rows: Int, cols: Int):
-        self.data = DTypePointer[type].alloc(rows * cols)
+        self.data = UnsafePointer[Scalar[type]].alloc(rows * cols)
         rand(self.data, rows * cols)
         self.rows = rows
         self.cols = cols
@@ -44,7 +44,7 @@ struct Matrix[type: DType]:
         return self.store[1](y, x, val)
 
     @always_inline
-    fn __setline__(self, y: Int, size: Int, values: DTypePointer[type]):
+    fn __setline__(self, y: Int, size: Int, values: UnsafePointer[Scalar[type]]):
         for i in range(size):
             self.data.store[width=1](y * self.cols + i, values.load[width=1](i))
 

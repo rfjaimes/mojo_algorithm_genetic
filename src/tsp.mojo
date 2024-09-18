@@ -20,7 +20,7 @@ fn load_distances() raises -> List[Int]:
     print("Total distances: ", len(vector))
     return vector
 
-
+@parameter
 fn load_cities(city_count: Int) raises -> Matrix[DType.float32]:
     var cities = Matrix[DType.float32](int(city_count), int(city_count))
     var distances = load_distances()
@@ -30,11 +30,11 @@ fn load_cities(city_count: Int) raises -> Matrix[DType.float32]:
     return cities
 
 
-fn generate_permutation(city_count: Int) -> DTypePointer[DType.int32]:
+fn generate_permutation(city_count: Int) -> UnsafePointer[Int32]:
     # Genera una ruta aleatoria que visita cada ciudad exactamente una vez
     # var np = Python.import_module("numpy")
     # route = np.random.permutation(int(city_count))
-    var vector = DTypePointer[DType.int32].alloc(city_count)
+    var vector = UnsafePointer[Int32].alloc(city_count)
     for i in range(city_count):
         vector[i] = i
 
@@ -47,7 +47,7 @@ fn generate_permutation(city_count: Int) -> DTypePointer[DType.int32]:
         vector[j] = temp
     return vector
 
-
+@parameter
 fn calculate_distance(
     pos_city1: Int, pos_city2: Int, inout cities: Matrix[DType.float32]
 ) -> Float32:
