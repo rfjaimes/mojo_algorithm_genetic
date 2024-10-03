@@ -3,6 +3,7 @@ from matrixtype import Matrix
 from random import randint
 from random import random_float64
 from time import now
+from algorithm import parallelize
 
 alias crossover_probability: Float64 = 0.8
 alias mutation_probability: Float64 = 0.2
@@ -70,7 +71,7 @@ fn calculate_distance_lineal(
     var distance = ((xdiff) ** 2 + (ydiff) ** 2) ** 0.5
     return distance
 
-
+@parameter
 fn total_distance(
     inout population: Matrix[DType.int32],
     pop_idx: Int,
@@ -93,16 +94,17 @@ fn total_distance(
 
 
 fn evaluate_population(
+    inout fitness_values: List[SIMD[DType.float32, 1]],
     inout population: Matrix[DType.int32],
     inout cities: Matrix[DType.float32],
     city_count: Int,
     population_size: Int,
-) -> List[SIMD[DType.float32, 1]]:
+):
     # Evalúa la aptitud de cada individuo en la población
-    var fitness_values = List[SIMD[DType.float32, 1]]()
-    for y in range(population_size):
-        fitness_values.append(total_distance(population, y, cities, city_count))
-    return fitness_values
+    @parameter
+    fn worker(y: Int):
+        fitness_values[y] = total_distance(population, y, cities, city_count)
+    parallelize[worker](population_size)
 
 
 fn containInArray(array: List[Int], value: Int) -> Bool:
@@ -261,12 +263,12 @@ fn main() raises:
     var city_count: Int = 251
     var population_size: Int = 100
     var generations: Int = 1000
-    var start_time = now()
 
     # Generar ciudades aleatorias en un espacio bidimensional
     print("Cities:")
     var cities: Matrix[DType.float32] = load_cities(city_count)
-    cities.dump()
+    # cities.dump()
+    var start_time = now()
 
     # Inicializar la población
     var population = Matrix[DType.int32](population_size, city_count)
@@ -276,19 +278,18 @@ fn main() raises:
     # print("Poblacion:")
     # population.dump()
 
+    # Initializar fitness_values
+    var zeroValue = SIMD[DType.float32, 1] (0)
+    var fitness_values = List[SIMD[DType.float32, 1]] (capacity=population_size)
+    for _ in range(population_size):
+        fitness_values.append(zeroValue)
+
     for i in range(generations):
-        var fitness_values: List[SIMD[DType.float32, 1]] = evaluate_population(
-            population, cities, city_count, population_size
-        )
+        evaluate_population(fitness_values, population, cities, city_count, population_size)
 
         select_elite(population, fitness_values, population_size)
         print(
-            "Generacion: ",
-            i,
-            "Best route: ",
-            population.selected[0],
-            " Distance: ",
-            fitness_values[population.selected[0]],
+            "Generacion: ", i,"Best route: ", population.selected[0]," Distance: ", fitness_values[population.selected[0]],
         )
 
         evolve_population(population)

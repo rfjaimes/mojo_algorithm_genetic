@@ -81,10 +81,10 @@ if __name__ == "__main__":
     generations = 1000
     crossover_probability = 0.8
     mutation_probability = 0.2
-    start_time = time.time()
 
     # Generar ciudades aleatorias en un espacio bidimensional
     cities = [(random.random(), random.random()) for _ in range(city_count)]
+    start_time = time.time()
 
     # Inicializar la población
     population = [generate_random_route(city_count) for _ in range(population_size)]
